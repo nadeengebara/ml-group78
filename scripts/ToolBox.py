@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-import costs
+from costs import *
 import helpers
 
 
@@ -9,20 +9,21 @@ def compute_gradient(y, tx, w):
     gradient=-(1/len(y))*((np.transpose(tx)).dot(y-(tx.dot(w))))
     return gradient
     
-def gradient_descent(y, tx, initial_w, max_iters, gamma):
+def gradient_descent(y, tx,initial_w, max_iters, gamma):
     """Gradient descent algorithm."""
     # Define parameters to store w and loss
     #define w_initial here
-    ws = [w_initial]
+    ws = [initial_w]
     losses = []
+    w = initial_w
     for n_iter in range(max_iters):
         gradient=compute_gradient(y,tx,w)
         loss=compute_loss_MSE(y, tx, w)
         w=w-(gamma*gradient)
         ws.append(np.copy(w))
         losses.append(loss)
-        print("Gradient Descent({bi}/{ti}): loss={l}, w0={w0}, w1={w1}".format(
-              bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
+        # print("Gradient Descent({bi}/{ti}): loss={l}, w0={w0}, w1={w1},w2={w2}, w3={w3},w4={w4}, w5={w5},w6={w6}, w7={w7},w8={w8}, w9={w9},w10={w10}, w11={w11},w12={w12}, w13={w13},w14={w14}, w15={w15},w16={w16}, w17={w17},w18={w18}, w19={w19},w20={w20}, w21={w21},w22={w22}, w23={w23},w24={w24}, w25={w25},w26={w26}, w27={w27},w28={w28}, w29={w29},w30={w30}, w31={w31},w32={w32}, w33={w33} \n".format(
+            #  bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1], w2=w[2], w3=w[3],w4=w[4], w5=w[5],w6=w[6], w7=w[7],w8=w[8], w9=w[9],w10=w[10], w11=w[11],w12=w[12], w13=w[13],w14=w[14], w15=w[15],w16=w[16], w17=w[17],w18=w[18], w19=w[19],w20=w[20], w21=w[21],w22=w[22], w23=w[23],w24=w[24], w25=w[25],w26=w[26], w27=w[27],w28=w[28], w29=w[29],w30=w[30], w31=w[31],w32=w[32], w33=w[33]))
 #output minimum loss w values
     return losses, ws
 
@@ -45,20 +46,17 @@ def stochastic_gradient_descent(y, tx,batch_size, max_epochs, gamma):
         losses.append(loss)
         
 def compute_subgradient(y, tx, w):
-    """Compute the gradient."""
-    # ***************************************************
     ones_vector=np.ones(len(y))
     error=y-(tx.dot(w))
-    # print(subgradient)
     for i in range(len(error)):
         if (error[i]<0):
             ones_vector[i]=-1  
         if (error[i]==0):
             print("encountered nondifferentiable point")
+    
     subgradient=(1/len(y))*(-1*(np.transpose(tx)).dot(ones_vector))
 
-    
-       return subgradient
+    return subgradient
 
 def subgradient_descent(y, tx, initial_w, max_iters, gamma): 
     ws = [initial_w]
@@ -72,7 +70,6 @@ def subgradient_descent(y, tx, initial_w, max_iters, gamma):
         losses.append(loss)
         print("Gradient Descent({bi}/{ti}): loss={l}, w0={w0}, w1={w1}".format(
               bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
-
     return losses, ws
         
         
@@ -83,13 +80,14 @@ def least_squares(y, tx):
 
 def ridge_regression(y, tx, lamb):
     xtx=np.transpose(tx).dot(tx)
-    lambdaprime=2*lamb*len(tx)
+    lambdaprime=2*lamb*len(y)
     lambdaprime_identity=lambdaprime*np.identity(tx.shape[1])
-    first_term=xtx+lambdaprime_identity
-    first_term_inv=np.linalg.inv(first_term)
-    second_term=np.transpose(tx).dot(y)
-    weight=first_term_inv.dot(second_term)
-    return weight
+    A=np.transpose(xtx+lambdaprime_identity)
+    B=np.transpose(y).dot(tx)
+    w=np.linalg.solve(A,B)
+    return w
+
+
 
 def split_data(x, y, ratio, seed=1):
     

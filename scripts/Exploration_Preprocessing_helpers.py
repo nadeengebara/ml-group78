@@ -24,6 +24,8 @@ def feature_plot(X):
         feature_hist(X,X[:,i], bins=50, title='feature ' + str(i + 1))
 plt.show()
 
+
+
 def observe_feature_classification(X,y):
     """Plots the classification versus each feature """
     nb_cols_subplot = 2
@@ -52,9 +54,56 @@ def plot_number_invalid_values(X):
     plt.savefig("invalid_Values")
 plt.show()
 
+def plot_number_zeros(X):
+    """Plots the number of -999 values within each feature"""
+    invalid_values=np.zeros(X.shape[1])
+    for i in range(X.shape[1]):
+        invalid_values[i] = nb_invalid_data(X[:,i],0)  
+    plt.bar(range(30),invalid_values, width=0.5)
+    plt.ylim([0, X.shape[0]])
+    plt.title("Number of invalid values")
+    plt.xlabel("feature index")
+    plt.ylabel("total number")
+    plt.minorticks_on()
+    plt.grid(True)
+plt.show()
+
+def plot_number_particle(y,col):
+    """Plots the number of -999 values within each feature"""
+    number=np.zeros(4)
+    count=np.zeros(4)
+    number,count=nb_particles(y,col,4)
+    a=np.linspace(0,3,4)
+    plt.ylim([0, len(y)/5])
+    plt.xlim([0,col.max()+1])
+    plt.xlabel("Discrete_value")
+    plt.ylabel("total number of particles")
+    plt.minorticks_on()
+    plt.grid(True)
+    plt.bar(a, number, width=0.25,color='blue')
+    plt.show()
+    plt.ylim([0, len(y)+10])
+    plt.xlabel("Discrete_value")
+    plt.ylabel("total number of rows")
+    plt.bar(a, count, width=0.25, color='red')
+    plt.show()
+    return number,count
+   
+
+
 def nb_invalid_data(col_x, invalid_value=-999):
     """Helper function to determine the number of invalid values for each feature"""
     return col_x[col_x == invalid_value].shape[0]
+
+def nb_particles(y,col_x,discrete_vals):
+    """Helper function to determine the number of particles for each discrete value"""
+    count=np.zeros(int(discrete_vals))
+    vec=np.zeros(int(discrete_vals))
+    for i in range (len(y)):
+        count[int(col_x[i])]=count[int(col_x[i])]+1
+        if y[i]==1:
+            vec[int(col_x[i])]=vec[int(col_x[i])]+1
+    return vec,count
     
 
 def compute_correlation(X,y):
@@ -103,7 +152,7 @@ def remove_uncorrelated_features(X,y,threshold=0.005):
 
 """ 1. Column Based Operations"""
 
-def clean_up_invalid_values_mean(col_x, invalid_value=-999):
+def clean_up_invalid_values_mean(col_x,invalid_value=-999):
     """Replaces specified invalid values by the mean"""
     mean = col_x[col_x != -999].mean()
     col_x[col_x == -999] = mean
@@ -111,7 +160,6 @@ def clean_up_invalid_values_mean(col_x, invalid_value=-999):
 
 def clean_up_invalid_values_mean_special(col_x):
     """Replaces specified invalid values by the mean"""
-    col_x
     col=col_x[col_x != -999]
     col=col[col != 0]
     mean = col.mean()
@@ -120,7 +168,6 @@ def clean_up_invalid_values_mean_special(col_x):
     return col_x
 
 def eliminate_outliers(col_x,thershold):
-    col_x
     mean= col_x[col_x <= thershold].mean()
     col_x[col_x > thershold] = mean
     return col_x
@@ -128,7 +175,6 @@ def eliminate_outliers(col_x,thershold):
 
 def clean_up_invalid_values_median(col_x, invalid_value=-999):
     """Replaces specified invalid values by the median"""
-    col_x
     col=col_x[col_x != -999]
     median=np.median(col)
     col_x[col_x == -999] = median
@@ -138,7 +184,7 @@ def binarize_invalid_data(col, invalid_value=-999):
     """Transform features with -999 values into a binary categorisation"""
     result = np.zeros((col.shape))
     invalid_value_indices = col == invalid_value
-    result[invalid_value_indices] = 0
+    result[invalid_value_indices] = -1
     result[~invalid_value_indices] = 1
     return result
 
@@ -147,7 +193,7 @@ def binarize_positive_negative(col):
     result = np.zeros((col.shape))
     positive_indices = col > 0
     result[positive_indices] = 1
-    result[~positive_indices] =0
+    result[~positive_indices] =-1
     return result
 
 def binarize_magnitude(col,threshold=2):
@@ -155,7 +201,7 @@ def binarize_magnitude(col,threshold=2):
     result = np.zeros((col.shape))
     pos=abs(col)>=threshold
     result[pos]=1
-    result[~pos]=0
+    result[~pos]=-1
     return result
    
 
@@ -220,14 +266,12 @@ def generate_binary_features(col):
 def build_poly(x, degree):
     """polynomial basis functions for input data x, for j=0 up to j=degree."""
     phi=np.matrix
-    phi=np.zeros((len(x), degree+1))
+    phi=np.zeros((len(x), degree))
     for i in range (0, degree):
         phi[:,i]=x**(i+1)
     return phi
 
 
-
-    
 
 """ 2. Simplified Matrix Based Operations"""
 
